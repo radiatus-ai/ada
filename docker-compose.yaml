@@ -1,0 +1,44 @@
+services:
+  database:
+    image: pgvector/pgvector:pg16
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=platformdb
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testpwd
+      - POSTGRES_HOST_AUTH_METHOD=trust
+
+  api:
+    platform: linux/amd64
+    build:
+      dockerfile: ./Dockerfile
+      context: ./api
+    environment:
+      - POSTGRES_SERVER=database
+    env_file:
+      - ./api/.env
+    ports:
+      - 8000:8000
+
+  ui-deploy:
+    platform: linux/amd64
+    build:
+      dockerfile: ./Dockerfile
+      context: ./ui
+    volumes:
+      # - ./ui/src:/app/src
+      # - ./ui/public:/app/public
+      - ui_node_modules:/app/node_modules
+    environment:
+      - REACT_APP_ENV=production
+      - HONEYCOMB_API_KEY=${PLATFORM_API_PROD_HONEYCOMB_API_KEY}
+
+  api-deploy:
+    platform: linux/amd64
+    build:
+      dockerfile: ./Dockerfile
+      context: ./api
+
+volumes:
+  ui_node_modules:

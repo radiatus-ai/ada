@@ -1,0 +1,38 @@
+repos:
+  - repo: local
+    hooks:
+      - id: api-hooks
+        name: API Hooks
+        entry: bash -c 'cd api && pre-commit run --config .pre-commit-config.yaml'
+        language: system
+        pass_filenames: false
+        files: ^api/
+
+      - id: ui-hooks
+        name: UI Hooks
+        entry: bash -c 'cd ui && pre-commit run --config .pre-commit-config.yaml'
+        language: system
+        pass_filenames: false
+        files: ^ui/
+
+      - id: ui-test-hooks
+        name: UI Test Hooks
+        entry: bash -c 'cd ui-test && pre-commit run --config .pre-commit-config.yaml'
+        language: system
+        pass_filenames: false
+        files: ^ui-test/
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+  # - repo: https://github.com/commitizen-tools/commitizen
+  #   rev: v3.18.4
+  #   hooks:
+  #     - id: commitizen
+  #       stages: [commit-msg]
