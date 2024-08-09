@@ -24,7 +24,7 @@ deploy: build tag upload
 					--project=rad-dev-platapi-4r64 \
 					&& gcloud run services update-traffic api --to-latest --region us-central1 && \
 				gcloud run deploy ui \
-					--image=us-central1-docker.pkg.dev/rad-containers-hmed/platform/-ui:latest \
+					--image=us-central1-docker.pkg.dev/rad-containers-hmed/platform/ui:latest \
 					--execution-environment=gen2 \
 					--region=us-central1 \
 					--project=rad-dev-platapi-4r64 \

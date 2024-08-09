@@ -39,7 +39,7 @@ root.render(
     >
       <RecoilRoot>
         <ThemeContextProvider>
-          <GoogleOAuthProvider clientId="368747471698-m570pnvdpes6cncrupq9r2vvjp20951m.apps.googleusercontent.com">
+          <GoogleOAuthProvider clientId="92446036622-3h0e0a0nm8a9cui468pat7ep1ni3f659.apps.googleusercontent.com">
             <AuthProvider>
               <SnackbarProvider>
                 <TitleProvider>
