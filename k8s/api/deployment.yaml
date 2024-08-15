@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+      matchLabels:
+        app: api
+  template:
+      metadata:
+        labels:
+            app: api
+      spec:
+        serviceAccountName: api
+        containers:
+            - name: api
+              image: us-central1-docker.pkg.dev/rad-containers-hmed/platform/api:latest
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  memory: "1Gi"
+                  cpu: "500m"
+                # limits:
+                #   memory: "512Mi"
+                #   cpu: "500m"
+              ports:
+              - name: http
+                containerPort: 8000
+              env:
+                - name: POSTGRES_SERVER
+                  value: bar
+                - name: POSTGRES_USER
+                  value: bar
+                - name: POSTGRES_PASSWORD
+                  value: bar
+                - name: POSTGRES_DB
+                  value: platformdb
+                - name: GOOGLE_CLIENT_ID
+                  value: bar
+                - name: CREDENTIAL_ENCRYPTION_KEY
+                  value: bar
+                - name: OTEL_SERVICE_NAME
+                  value: bar
+                - name: OTEL_EXPORTER_OTLP_ENDPOINT
+                  value: bar
+                - name: OTEL_EXPORTER_OTLP_HEADERS
+                  value: bar
+                - name: HONEYCOMB_API_KEY
+                  value: bar
+                - name: HONEYCOMB_DATASET
+                  value: bar
