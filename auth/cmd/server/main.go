@@ -1,17 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+
+	"github.com/radiatus-ai/auth-service/config"
 	"github.com/radiatus-ai/auth-service/internal/auth"
 	"github.com/radiatus-ai/auth-service/internal/middleware"
-	"github.com/radiatus-ai/auth-service/internal/model"
 	"github.com/radiatus-ai/auth-service/internal/repository"
 )
 
@@ -21,22 +25,29 @@ func main() {
 		log.Println("No .env file found")
 	}
 
+	// Load configuration
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v", err)
+	}
+
+	// Run database migrations
+	if err := runMigrations(cfg.DatabaseURL); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+
 	// Database connection
-	db, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Auto migrate the schema
-	if err := db.AutoMigrate(&model.User{}); err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
-	}
-
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
+	orgRepo := repository.NewOrganizationRepository(db)
 
 	// Initialize services
-	authService := auth.NewService(userRepo, os.Getenv("JWT_SECRET"))
+	authService := auth.NewService(userRepo, orgRepo, cfg.JWTSecret, cfg.GoogleClientID)
 
 	// Initialize handlers
 	authHandler := auth.NewHandler(authService)
@@ -47,6 +58,7 @@ func main() {
 	// Public routes
 	router.POST("/register", authHandler.Register)
 	router.POST("/login", authHandler.Login)
+	router.POST("/login/google", authHandler.LoginGoogle)
 
 	// Protected routes
 	api := router.Group("/api")
@@ -58,15 +70,21 @@ func main() {
 		})
 	}
 
-	// Proxy routes (if needed)
-	// router.Any("/ai/*path", middleware.AuthMiddleware(authService), middleware.ProxyRequest("http://ai-service:8080"))
-
 	// Start the server
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	if err := router.Run(":" + port); err != nil {
+	if err := router.Run(":" + cfg.Port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+func runMigrations(databaseURL string) error {
+	m, err := migrate.New("file://migrations", databaseURL)
+	if err != nil {
+		return fmt.Errorf("failed to create migrate instance: %w", err)
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return fmt.Errorf("failed to run migrations: %w", err)
+	}
+
+	return nil
 }

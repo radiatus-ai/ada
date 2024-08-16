@@ -1,34 +1,37 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"time"
 
+	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/radiatus-ai/auth-service/internal/model"
 	"github.com/radiatus-ai/auth-service/internal/repository"
-	"github.com/radiatus-ai/auth-service/pkg/jwt"
-)
-
-var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrUserAlreadyExists  = errors.New("user already exists")
+	"google.golang.org/api/idtoken"
 )
 
 type Service interface {
 	Register(email, password string) error
 	Login(email, password string) (string, error)
+	LoginGoogle(token string) (string, error)
 	VerifyToken(token string) (string, error)
 }
 
 type service struct {
-	userRepo  repository.UserRepository
-	jwtSecret string
+	userRepo       repository.UserRepository
+	orgRepo        repository.OrganizationRepository
+	jwtSecret      string
+	googleClientID string
 }
 
-func NewService(userRepo repository.UserRepository, jwtSecret string) Service {
+func NewService(userRepo repository.UserRepository, orgRepo repository.OrganizationRepository, jwtSecret, googleClientID string) Service {
 	return &service{
-		userRepo:  userRepo,
-		jwtSecret: jwtSecret,
+		userRepo:       userRepo,
+		orgRepo:        orgRepo,
+		jwtSecret:      jwtSecret,
+		googleClientID: googleClientID,
 	}
 }
 
@@ -64,18 +67,67 @@ func (s *service) Login(email, password string) (string, error) {
 		return "", ErrInvalidCredentials
 	}
 
-	userIDString := user.ID.String()
+	return s.generateToken(user.ID)
+}
 
-	token, err := jwt.GenerateToken(userIDString, s.jwtSecret, 24*time.Hour)
+func (s *service) LoginGoogle(token string) (string, error) {
+	payload, err := idtoken.Validate(context.Background(), token, s.googleClientID)
 	if err != nil {
 		return "", err
 	}
 
-	return token, nil
+	googleID := payload.Subject
+	email := payload.Claims["email"].(string)
+
+	user, err := s.userRepo.GetByGoogleID(googleID)
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			// Create new user
+			user = &model.User{
+				Email:    email,
+				GoogleID: googleID,
+			}
+			if err := s.userRepo.Create(user); err != nil {
+				return "", err
+			}
+		} else {
+			return "", err
+		}
+	}
+
+	return s.generateToken(user.ID)
 }
 
-func (s *service) VerifyToken(token string) (string, error) {
-	return jwt.GetUserIDFromToken(token, s.jwtSecret)
+func (s *service) VerifyToken(tokenString string) (string, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return []byte(s.jwtSecret), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID, ok := claims["sub"].(string)
+		if !ok {
+			return "", errors.New("invalid user ID in token")
+		}
+		return userID, nil
+	}
+
+	return "", errors.New("invalid token")
+}
+
+func (s *service) generateToken(userID uuid.UUID) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": userID.String(),
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	return token.SignedString([]byte(s.jwtSecret))
 }
 
 // Helper functions for password hashing

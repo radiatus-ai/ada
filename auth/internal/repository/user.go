@@ -4,8 +4,9 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/radiatus-ai/auth-service/internal/model"
 	"gorm.io/gorm"
+
+	"github.com/radiatus-ai/auth-service/internal/model"
 )
 
 var (
@@ -16,6 +17,7 @@ type UserRepository interface {
 	Create(user *model.User) error
 	GetByEmail(email string) (*model.User, error)
 	GetByID(id uuid.UUID) (*model.User, error)
+	GetByGoogleID(googleID string) (*model.User, error)
 	ExistsByEmail(email string) (bool, error)
 }
 
@@ -44,7 +46,18 @@ func (r *userRepository) GetByEmail(email string) (*model.User, error) {
 
 func (r *userRepository) GetByID(id uuid.UUID) (*model.User, error) {
 	var user model.User
-	if err := r.db.Where("id = ?", id).First(&user).Error; err != nil {
+	if err := r.db.First(&user, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) GetByGoogleID(googleID string) (*model.User, error) {
+	var user model.User
+	if err := r.db.Where("google_id = ?", googleID).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrUserNotFound
 		}
