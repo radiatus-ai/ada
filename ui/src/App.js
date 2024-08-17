@@ -1,6 +1,5 @@
 import { Box, CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
-import { AuthApi } from 'ada-client';
 import React, { Suspense, useMemo } from 'react';
 import {
   Navigate,
@@ -10,7 +9,6 @@ import {
 } from 'react-router-dom';
 import LoadingSpinner from './components/common/RetroLoading';
 
-import { createApi } from './clients/adaClient';
 import AppHeader from './components/AppHeader';
 import LoginScreen from './components/Login';
 import SideDrawer from './components/SideDrawer';
@@ -38,14 +36,47 @@ function App() {
     window.location.href = '/';
   };
 
+  // const onLogin = async (decodedToken, authToken) => {
+  //   const authApi = createApi(AuthApi, authToken);
+  //   const data = { token: authToken };
+  //   try {
+  //     const response = await authApi.loginGoogleAuthLoginPost(data);
+  //     login(response.body.user, response.body.token);
+  //   } catch (error) {
+  //     console.error('Login error:', error);
+  //   }
+  // };
+
   const onLogin = async (decodedToken, authToken) => {
-    const authApi = createApi(AuthApi, authToken);
-    const data = { token: authToken };
+    // const testGoogleLogin = async function(googleToken) {
+    const apiUrl = 'http://localhost:8080'; // Adjust this to your API's URL
+    const endpoint = '/login/google';
+
     try {
-      const response = await authApi.loginGoogleAuthLoginPost(data);
-      login(response.body.user, response.body.token);
+      const response = await fetch(`${apiUrl}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: authToken }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      login(data.user, data.token);
+      console.log('Login successful:', data);
+
+      // You can handle the successful login here, e.g., storing the token
+      // localStorage.setItem('authToken', data.token);
+
+      return data;
     } catch (error) {
       console.error('Login error:', error);
+      throw error;
     }
   };
 

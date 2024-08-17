@@ -53,5 +53,11 @@ func (h *Handler) VerifyToken(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user_id": userID})
+	user, err := h.service.GetUserByID(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user data"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": user})
 }

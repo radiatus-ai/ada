@@ -63,6 +63,7 @@ func main() {
 
 	// Public routes
 	router.POST("/login/google", authHandler.LoginGoogle)
+	router.POST("/api/verify-token", authHandler.VerifyToken)
 
 	// Protected routes
 	api := router.Group("/api")

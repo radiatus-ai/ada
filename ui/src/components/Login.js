@@ -6,10 +6,8 @@ import {
   Typography,
 } from '@mui/material';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { AuthApi } from 'ada-client';
 import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { createApi } from '../clients/adaClient';
 import { useAuth } from '../contexts/Auth';
 import AuthenticationComponent from './Authentication';
 import Model from './LoginModel';
@@ -191,7 +189,7 @@ function Fireflies({ count = 100 }) {
   );
 }
 
-function LoginScreen({ onError }) {
+function LoginScreen({ onLogin, onError }) {
   const [isRotating, setIsRotating] = useState(false);
   const [timeOfDay, setTimeOfDay] = useState('day');
   const [isRaining, setIsRaining] = useState(false);
@@ -266,20 +264,20 @@ function LoginScreen({ onError }) {
   const currentCity = 'sanfrancisco';
   const theModel = `https://storage.googleapis.com/ui-models/${currentCity}.gltf`;
 
-  const handleLogin = async (decodedToken, authToken) => {
-    setIsLoading(true);
-    try {
-      const authApi = createApi(AuthApi, authToken);
-      const data = { token: authToken };
-      const response = await authApi.loginGoogleAuthLoginPost(data);
-      login(response.body.user, response.body.token);
-      // The login function from AuthContext should handle the redirection
-    } catch (error) {
-      onError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const handleLogin = async (decodedToken, authToken) => {
+  //   setIsLoading(true);
+  //   try {
+  //     const authApi = createApi(AuthApi, authToken);
+  //     const data = { token: authToken };
+  //     const response = await authApi.loginGoogleAuthLoginPost(data);
+  //     login(response.body.user, response.body.token);
+  //     // The login function from AuthContext should handle the redirection
+  //   } catch (error) {
+  //     onError(error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   return (
     <Box
@@ -390,10 +388,7 @@ function LoginScreen({ onError }) {
                 <CircularProgress size={50} sx={{ color: '#ff00ff' }} />
               </Box>
             ) : (
-              <AuthenticationComponent
-                onLogin={handleLogin}
-                onError={onError}
-              />
+              <AuthenticationComponent onLogin={onLogin} onError={onError} />
             )}
           </Box>
         </Paper>

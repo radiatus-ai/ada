@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -17,6 +18,7 @@ import (
 type Service interface {
 	LoginGoogle(token string) (*UserData, error)
 	VerifyToken(token string) (string, error)
+	GetUserByID(userID string) (*model.User, error)
 }
 
 type service struct {
@@ -118,11 +120,15 @@ func (s *service) isEmailAllowed(email string) bool {
 }
 
 func (s *service) VerifyToken(tokenString string) (string, error) {
-	log.Println("Verifying token")
+	log.Printf("Received token for verification: %s", tokenString)
+
+	parts := strings.Split(tokenString, ".")
+	log.Printf("Token parts: %d", len(parts))
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			log.Println("Unexpected signing method")
-			return nil, errors.New("unexpected signing method")
+			log.Printf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(s.jwtSecret), nil
 	})
@@ -144,6 +150,23 @@ func (s *service) VerifyToken(tokenString string) (string, error) {
 
 	log.Println("Invalid token")
 	return "", errors.New("invalid token")
+}
+
+func (s *service) GetUserByID(userID string) (*model.User, error) {
+	log.Printf("Getting user by ID: %s", userID)
+	id, err := uuid.Parse(userID)
+	if err != nil {
+		log.Printf("Failed to parse user ID: %v", err)
+		return nil, errors.New("invalid user ID")
+	}
+
+	user, err := s.userRepo.GetByID(id)
+	if err != nil {
+		log.Printf("Failed to get user by ID: %v", err)
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (s *service) generateToken(userID uuid.UUID) (string, error) {
