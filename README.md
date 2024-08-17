@@ -9,7 +9,17 @@ Database
 In a separate tab, bring up the database.
 
 ```
-docker compose up database
+docker compose up database_auth database
+```
+
+AUTH
+
+This will be moved to a different repo, Dockerized, etc.
+
+```
+cd auth
+go get
+make start
 ```
 
 API
@@ -40,7 +50,6 @@ npm start
 ## Deploying To Dev
 
 `make deploy`
-
 
 ## Platform Schema
 

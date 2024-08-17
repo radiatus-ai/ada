@@ -11,9 +11,11 @@ from app.models import (
     ChatMessage,
     Chat,
     Credential,
-    Organization,
+    # Organization,
+    OrganizationReference,
     Project,
-    User,
+    # User,
+    UserReference,
 )
 
 # You can also import and register your models automatically:

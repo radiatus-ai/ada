@@ -40,8 +40,9 @@ func NewService(userRepo repository.UserRepository, orgRepo repository.Organizat
 }
 
 type UserData struct {
-	Token string     `json:"token"`
-	User  model.User `json:"user"`
+	Token          string     `json:"token"`
+	User           model.User `json:"user"`
+	OrganizationID uuid.UUID  `json:"organization_id"`
 }
 
 func (s *service) LoginGoogle(token string) (*UserData, error) {
@@ -61,10 +62,11 @@ func (s *service) LoginGoogle(token string) (*UserData, error) {
 		return nil, ErrUnauthorizedEmail
 	}
 
+	var organizationID uuid.UUID
 	user, err := s.userRepo.GetByGoogleID(googleID)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
-			log.Printf("User not found, creating new user for email: %s", email)
+			// Create new user
 			user = &model.User{
 				Email:    email,
 				GoogleID: googleID,
@@ -74,9 +76,9 @@ func (s *service) LoginGoogle(token string) (*UserData, error) {
 				return nil, err
 			}
 
-			log.Printf("Creating new organization for user: %s", email)
+			// Create new organization
 			org := &model.Organization{
-				Name: email,
+				Name: email, // You might want to use a different naming convention
 			}
 			if err := s.orgRepo.Create(org); err != nil {
 				log.Printf("Failed to create organization: %v", err)
@@ -87,12 +89,22 @@ func (s *service) LoginGoogle(token string) (*UserData, error) {
 				log.Printf("Failed to add user to organization: %v", err)
 				return nil, err
 			}
+
+			// Use the newly created organization's ID
+			organizationID = org.ID
 		} else {
 			log.Printf("Error retrieving user: %v", err)
 			return nil, err
 		}
 	} else {
 		log.Printf("Existing user found for email: %s", email)
+		// Get the user's organization
+		org, err := s.orgRepo.GetUserOrganization(user.ID)
+		if err != nil {
+			log.Printf("Failed to get user organization: %v", err)
+			return nil, err
+		}
+		organizationID = org.ID
 	}
 
 	token, err = s.generateToken(user.ID)
@@ -101,9 +113,11 @@ func (s *service) LoginGoogle(token string) (*UserData, error) {
 		return nil, err
 	}
 	log.Println("Successfully generated token")
+
 	return &UserData{
-		Token: token,
-		User:  *user,
+		Token:          token,
+		User:           *user,
+		OrganizationID: organizationID,
 	}, nil
 }
 
@@ -177,15 +191,4 @@ func (s *service) generateToken(userID uuid.UUID) (string, error) {
 	})
 
 	return token.SignedString([]byte(s.jwtSecret))
-}
-
-// Helper functions for password hashing
-func hashPassword(password string) (string, error) {
-	// Implement password hashing (e.g., using bcrypt)
-	return password, nil // Placeholder
-}
-
-func checkPasswordHash(password, hash string) bool {
-	// Implement password hash checking
-	return password == hash // Placeholder
 }

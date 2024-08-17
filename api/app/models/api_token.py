@@ -12,7 +12,9 @@ class APIToken(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     token = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    user_id = Column(
+        UUID(as_uuid=True), ForeignKey("user_references.id"), nullable=False
+    )
     last_used_at = Column(DateTime(timezone=True), nullable=True)
 
-    user = relationship("User", back_populates="api_tokens")
+    user = relationship("UserReference", back_populates="api_tokens")

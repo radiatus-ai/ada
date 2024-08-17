@@ -23,6 +23,7 @@ type OrganizationRepository interface {
 	AddUser(orgID, userID uuid.UUID) error
 	RemoveUser(orgID, userID uuid.UUID) error
 	GetUserOrganizations(userID uuid.UUID) ([]model.Organization, error)
+	GetUserOrganization(userID uuid.UUID) (*model.Organization, error)
 }
 
 type organizationRepository struct {
@@ -81,4 +82,19 @@ func (r *organizationRepository) GetUserOrganizations(userID uuid.UUID) ([]model
 		return nil, err
 	}
 	return orgs, nil
+}
+
+func (r *organizationRepository) GetUserOrganization(userID uuid.UUID) (*model.Organization, error) {
+	var org model.Organization
+	err := r.db.
+		Joins("JOIN user_organizations ON user_organizations.organization_id = organizations.id").
+		Where("user_organizations.user_id = ?", userID).
+		First(&org).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrOrganizationNotFound
+		}
+		return nil, err
+	}
+	return &org, nil
 }

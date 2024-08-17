@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -45,6 +45,35 @@ class CRUDProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):
         )
         result = await db.execute(query)
         return result.scalars().all()
+
+    async def get_default_project(
+        self, db: AsyncSession, organization_id: UUID
+    ) -> Optional[Project]:
+        query = select(Project).where(
+            Project.organization_id == organization_id, Project.is_user_default == True
+        )
+        result = await db.execute(query)
+        return result.scalar_one_or_none()
+
+    async def get_or_create_default(
+        self, db: AsyncSession, organization_id: UUID
+    ) -> Project:
+        stmt = select(self.model).where(
+            self.model.organization_id == organization_id,
+            self.model.is_user_default == True,
+        )
+        result = await db.execute(stmt)
+        default_project = result.scalar_one_or_none()
+
+        if not default_project:
+            project_in = ProjectCreate(
+                name="Default Project",
+                is_user_default=True,
+                organization_id=organization_id,
+            )
+            default_project = await self.create(db, obj_in=project_in)
+
+        return default_project
 
     async def update_project(
         self, db: AsyncSession, *, db_obj: Project, obj_in: ProjectUpdate

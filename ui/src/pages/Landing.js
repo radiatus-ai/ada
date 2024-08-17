@@ -23,7 +23,7 @@ const LandingContainer = () => {
     try {
       // need to get default / current project from token
       const response = await projectsApi.listRecentChats(
-        '893cec4b-2a50-475f-94d4-803aec815a5b',
+        '2af44c08-a8ad-4284-afd2-e69deae8fd82',
         token
       );
       setRecentChats(response.body);
@@ -52,7 +52,7 @@ const LandingContainer = () => {
     setInputValue('');
     try {
       const response = await projectsApi.createChat(
-        '893cec4b-2a50-475f-94d4-803aec815a5b',
+        '2af44c08-a8ad-4284-afd2-e69deae8fd82',
         {
           name: inputValue,
           model: 'modeldog',
