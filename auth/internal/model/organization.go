@@ -8,11 +8,11 @@ import (
 )
 
 type Organization struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key;"`
-	Name      string    `gorm:"not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Users     []User `gorm:"many2many:user_organizations;"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"`
+	Name      string    `gorm:"not null" json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Users     []User    `gorm:"many2many:user_organizations;" json:"users,omitempty"`
 }
 
 func (o *Organization) BeforeCreate(tx *gorm.DB) error {

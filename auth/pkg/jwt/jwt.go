@@ -9,7 +9,7 @@ import (
 
 var (
 	ErrInvalidToken = errors.New("invalid token")
-	ErrExpiredToken = errors.New("expired token")
+	ErrExpiredToken = errors.New("token is expired")
 )
 
 type Claims struct {
@@ -37,10 +37,12 @@ func ValidateToken(tokenString string, secret string) (*Claims, error) {
 	})
 
 	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			return nil, ErrInvalidToken
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			if ve.Errors&jwt.ValidationErrorExpired != 0 {
+				return nil, ErrExpiredToken
+			}
 		}
-		return nil, err
+		return nil, ErrInvalidToken
 	}
 
 	if !token.Valid {
@@ -50,10 +52,6 @@ func ValidateToken(tokenString string, secret string) (*Claims, error) {
 	claims, ok := token.Claims.(*Claims)
 	if !ok {
 		return nil, ErrInvalidToken
-	}
-
-	if time.Unix(claims.ExpiresAt, 0).Before(time.Now()) {
-		return nil, ErrExpiredToken
 	}
 
 	return claims, nil

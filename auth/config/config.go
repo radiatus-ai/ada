@@ -12,6 +12,7 @@ type Config struct {
 	JWTSecret      string
 	GoogleClientID string
 	Port           string
+	EmailWhitelist []string
 }
 
 func Load() (*Config, error) {
@@ -29,5 +30,9 @@ func Load() (*Config, error) {
 		JWTSecret:      os.Getenv("JWT_SECRET"),
 		GoogleClientID: os.Getenv("GOOGLE_CLIENT_ID"),
 		Port:           os.Getenv("PORT"),
+		EmailWhitelist: []string{
+			"radiatus.io",
+			// Add more allowed domains or full email addresses here
+		},
 	}, nil
 }

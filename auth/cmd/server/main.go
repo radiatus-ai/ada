@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -20,11 +21,6 @@ import (
 )
 
 func main() {
-	// Load environment variables
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
-	}
-
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
@@ -36,7 +32,7 @@ func main() {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
-	// Database connection
+	// Connect to the database
 	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
@@ -47,7 +43,7 @@ func main() {
 	orgRepo := repository.NewOrganizationRepository(db)
 
 	// Initialize services
-	authService := auth.NewService(userRepo, orgRepo, cfg.JWTSecret, cfg.GoogleClientID)
+	authService := auth.NewService(userRepo, orgRepo, cfg.JWTSecret, cfg.GoogleClientID, cfg.EmailWhitelist)
 
 	// Initialize handlers
 	authHandler := auth.NewHandler(authService)
@@ -55,9 +51,17 @@ func main() {
 	// Set up Gin router
 	router := gin.Default()
 
+	// Configure CORS
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"}, // Add your frontend URL
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	// Public routes
-	router.POST("/register", authHandler.Register)
-	router.POST("/login", authHandler.Login)
 	router.POST("/login/google", authHandler.LoginGoogle)
 
 	// Protected routes
