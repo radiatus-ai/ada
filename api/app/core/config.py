@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
     ALGORITHM: str = "HS256"
     CREDENTIAL_ENCRYPTION_KEY: str
+    AUTH_SERVICE_URL: str = "http://localhost:8080"
 
     OTEL_SERVICE_NAME: str = "your-service-name"
     OTEL_EXPORTER_OTLP_PROTOCOL: str = "http/protobuf"

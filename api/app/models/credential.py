@@ -7,7 +7,6 @@ from sqlalchemy import Column, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-# from app.core.security import encrypt, decrypt
 from app.core.config import settings
 from app.db.base_class import Base
 
@@ -25,16 +24,11 @@ class Credential(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, index=True)
     credential_type = Column(String)
-    # @field_validator('credential_type')
-    # def validate_credential_type(self, key, value):
-    #     if value not in CredentialType.__members__:
-    #         raise ValueError(f"Invalid credential type: {value}")
-    #     return value
     encrypted_data = Column(Text)
     organization_id = Column(
-        UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False
+        UUID(as_uuid=True), ForeignKey("organization_references.id"), nullable=False
     )
-    organization = relationship("Organization", back_populates="credentials")
+    organization = relationship("OrganizationReference")
 
     def set_data(self, data: dict):
         """Encrypt and set the credential data"""

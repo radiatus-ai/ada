@@ -1,10 +1,10 @@
+from platform.api.app.models.organization_old import Organization
 from uuid import UUID
 
 import pytest
 from sqlalchemy.future import select
 
 from app.crud.project import project as crud_project
-from app.models.organization import Organization
 from app.schemas.project import ProjectCreate
 
 

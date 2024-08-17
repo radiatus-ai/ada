@@ -12,8 +12,6 @@ class Project(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, index=True)
     is_user_default = Column(Boolean, default=False)
-    organization_id = Column(
-        UUID(as_uuid=True), ForeignKey("organization_references.id")
-    )
-    organization = relationship("OrganizationReference")
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"))
+    organization = relationship("Organization", back_populates="projects")
     chats = relationship("Chat", back_populates="project")

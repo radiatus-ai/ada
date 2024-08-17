@@ -1,9 +1,9 @@
+from platform.api.app.models.organization_old import Organization
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
-from app.models.organization import Organization
 
 # @pytest.mark.asyncio
 # async def test_database_seeded(async_session_test: AsyncSession):

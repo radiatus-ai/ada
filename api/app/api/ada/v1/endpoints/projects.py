@@ -8,7 +8,8 @@ from app.core.dependencies import get_db_and_current_user
 from app.core.logger import get_logger
 from app.crud.chat import chat as crud_chat
 from app.crud.project import project as crud_project
-from app.crud.user import user as crud_user
+
+# from app.crud.user import user as crud_user
 from app.schemas.chat import Chat, ChatCreate
 from app.schemas.project import ProjectCreate
 
@@ -72,7 +73,8 @@ async def create(
 ):
     db = deps["db"]
     current_user = deps["current_user"]
-    default_org = await crud_user.get_default_organization(db, user_id=current_user.id)
+    # default_org = await crud_user.get_default_organization(db, user_id=current_user.id)
+    default_org = "foobar"
     # TODO: replace with _current_ user organization
     project_in = ProjectCreate(name=body.name, organization_id=default_org.id)
     project = await crud_project.create_project(

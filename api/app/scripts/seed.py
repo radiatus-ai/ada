@@ -1,7 +1,7 @@
 import asyncio
+from platform.api.app.models.organization_old import Organization
 
 from app.db.session import SessionLocal
-from app.models.organization import Organization
 from app.models.user import User
 
 

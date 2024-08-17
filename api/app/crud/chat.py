@@ -9,8 +9,8 @@ from sqlalchemy.future import select
 from app.core.logger import get_logger
 from app.crud.base import CRUDBase
 from app.models.chat import Chat
-from app.models.project import Project
-from app.models.user import User, UserOrganization
+
+# from app.models.user import User, UserOrganization
 from app.schemas.chat import ChatCreate, ChatUpdate
 
 logger = get_logger(__name__)
@@ -71,22 +71,22 @@ class CRUDChat(CRUDBase[Chat, ChatCreate, ChatUpdate]):
         result = await db.execute(query)
         return result.scalars().all()
 
-    async def get_chats_for_user(
-        self, db: AsyncSession, *, user: User, skip: int = 0, limit: int = 100
-    ) -> List[Chat]:
-        query = (
-            select(Chat)
-            .join(Project, Chat.project_id == Project.id)
-            .join(
-                UserOrganization,
-                Project.organization_id == UserOrganization.organization_id,
-            )
-            .where(UserOrganization.user_id == user.id)
-            .offset(skip)
-            .limit(limit)
-        )
-        result = await db.execute(query)
-        return result.scalars().all()
+    # async def get_chats_for_user(
+    #     self, db: AsyncSession, *, user: User, skip: int = 0, limit: int = 100
+    # ) -> List[Chat]:
+    #     query = (
+    #         select(Chat)
+    #         .join(Project, Chat.project_id == Project.id)
+    #         .join(
+    #             UserOrganization,
+    #             Project.organization_id == UserOrganization.organization_id,
+    #         )
+    #         .where(UserOrganization.user_id == user.id)
+    #         .offset(skip)
+    #         .limit(limit)
+    #     )
+    #     result = await db.execute(query)
+    #     return result.scalars().all()
 
     async def update_chat(
         self, db: AsyncSession, *, db_obj: Chat, obj_in: ChatUpdate

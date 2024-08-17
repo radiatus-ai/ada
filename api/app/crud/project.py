@@ -1,13 +1,13 @@
 from typing import List
 
-from sqlalchemy import and_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.crud.base import CRUDBase
 from app.models.project import Project
-from app.models.user import User, UserOrganization
+
+# from app.models.user import User, UserOrganization
 from app.schemas.project import ProjectCreate, ProjectUpdate
 
 
@@ -25,27 +25,21 @@ class CRUDProject(CRUDBase[Project, ProjectCreate, ProjectUpdate]):
         db.add(db_obj)
         await db.flush()
         await db.refresh(db_obj)
-        # this actually causes problems, these should prob default false
         if auto_commit:
             await db.commit()
         return db_obj
 
-    async def list_projects_for_user(
-        self, db: AsyncSession, *, user: User, skip: int = 0, limit: int = 100
+    async def list_projects_for_organization(
+        self,
+        db: AsyncSession,
+        *,
+        organization_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
     ) -> List[Project]:
         query = (
             select(Project)
-            .join(Project.organization)
-            .join(
-                UserOrganization,
-                UserOrganization.organization_id == Project.organization_id,
-            )
-            .where(
-                and_(
-                    UserOrganization.user_id == user.id,
-                    UserOrganization.organization_id == Project.organization_id,
-                )
-            )
+            .where(Project.organization_id == organization_id)
             .offset(skip)
             .limit(limit)
         )

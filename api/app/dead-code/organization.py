@@ -1,5 +1,6 @@
+from platform.api.app.models.organization_old import Organization
+
 from app.crud.base import CRUDBase
-from app.models.organization import Organization
 from app.schemas.organization import OrganizationCreate, OrganizationUpdate
 
 
