@@ -22,20 +22,20 @@ type Service interface {
 }
 
 type service struct {
-	userRepo       repository.UserRepository
-	orgRepo        repository.OrganizationRepository
-	jwtSecret      string
-	googleClientID string
-	emailWhitelist []string
+	userRepo        repository.UserRepository
+	orgRepo         repository.OrganizationRepository
+	jwtSecret       string
+	googleClientIDs []string
+	emailWhitelist  []string
 }
 
-func NewService(userRepo repository.UserRepository, orgRepo repository.OrganizationRepository, jwtSecret, googleClientID string, emailWhitelist []string) Service {
+func NewService(userRepo repository.UserRepository, orgRepo repository.OrganizationRepository, jwtSecret string, googleClientIDs []string, emailWhitelist []string) Service {
 	return &service{
-		userRepo:       userRepo,
-		orgRepo:        orgRepo,
-		jwtSecret:      jwtSecret,
-		googleClientID: googleClientID,
-		emailWhitelist: emailWhitelist,
+		userRepo:        userRepo,
+		orgRepo:         orgRepo,
+		jwtSecret:       jwtSecret,
+		googleClientIDs: googleClientIDs,
+		emailWhitelist:  emailWhitelist,
 	}
 }
 
@@ -47,7 +47,17 @@ type UserData struct {
 
 func (s *service) LoginGoogle(token string) (*UserData, error) {
 	log.Println("Starting Google login process")
-	payload, err := idtoken.Validate(context.Background(), token, s.googleClientID)
+
+	var payload *idtoken.Payload
+	var err error
+
+	for _, clientID := range s.googleClientIDs {
+		payload, err = idtoken.Validate(context.Background(), token, clientID)
+		if err == nil {
+			break
+		}
+	}
+
 	if err != nil {
 		log.Printf("Failed to validate Google token: %v", err)
 		return nil, err

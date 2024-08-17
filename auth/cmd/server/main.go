@@ -43,7 +43,7 @@ func main() {
 	orgRepo := repository.NewOrganizationRepository(db)
 
 	// Initialize services
-	authService := auth.NewService(userRepo, orgRepo, cfg.JWTSecret, cfg.GoogleClientID, cfg.EmailWhitelist)
+	authService := auth.NewService(userRepo, orgRepo, cfg.JWTSecret, cfg.GoogleClientIDs, cfg.EmailWhitelist)
 
 	// Initialize handlers
 	authHandler := auth.NewHandler(authService)
