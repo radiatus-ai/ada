@@ -16,7 +16,7 @@ spec:
       serviceAccountName: api
       containers:
         - name: api
-          image: us-central1-docker.pkg.dev/rad-containers-hmed/platform/api:latest
+          image: us-central1-docker.pkg.dev/rad-containers-hmed/ai-platform/api:latest
           imagePullPolicy: IfNotPresent
           resources:
             requests:
@@ -45,11 +45,22 @@ spec:
                   name: api-secrets
                   key: POSTGRES_PASSWORD
             - name: POSTGRES_DB
+              value: neondb
+            - name: HONEYCOMB_DATASET
+              value: dev
+            - name: HONEYCOMB_API_KEY
               valueFrom:
-                configMapKeyRef:
-                  name: api-config
-                  key: POSTGRES_DB
-            # ... (other env variables follow the same pattern)
+                secretKeyRef:
+                  name: api-secrets
+                  key: HONEYCOMB_API_KEY
+            - name: GOOGLE_CLIENT_ID
+              value: 368747471698-m570pnvdpes6cncrupq9r2vvjp20951m.apps.googleusercontent.com
+            - name: CREDENTIAL_ENCRYPTION_KEY
+              value: aD7Qdt5ZV4x4PLZdms22PTCAy4CW0Vq8ka-3p_9mXiU=
+            - name: OTEL_SERVICE_NAME
+              value: api
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              value: x-honeycomb-team=1vS8424tiEnmZfDEZiQgLH
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

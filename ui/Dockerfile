@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20 as build
+FROM node:21 as build
 
 # Set working directory
 WORKDIR /app
@@ -7,14 +7,14 @@ WORKDIR /app
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
+COPY . .
+
 # Install dependencies
 RUN npm ci
 
-# Copy the rest of the code
-COPY . .
-
 # Set the environment variable for production
 ENV REACT_APP_ENV=production
+ENV HTTPS=true
 
 # Build the app
 RUN npm run build
