@@ -9,7 +9,7 @@ import {
 const getApiUrl = () => {
   switch (process.env.REACT_APP_ENV) {
     case 'production':
-      return 'https://api-razsp32k5q-uc.a.run.app';
+      return 'https://ai-api.dev.r7ai.net';
     case 'development':
     default:
       return process.env.REACT_APP_API_URL || 'http://localhost:8000';

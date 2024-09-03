@@ -13,3 +13,10 @@ api_router.include_router(me_router)
 # Include domain-specific routers
 api_router.include_router(ada_v1, prefix="/ada/v1")
 # Include other domain-specific routers here
+
+base_router = APIRouter()
+
+
+@base_router.get("/", dependencies=[])
+async def root():
+    return "healthy"
