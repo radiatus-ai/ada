@@ -12,9 +12,9 @@ metadata:
     # ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   # this has to be commented out until the DNS is established, then the cert is made, then we can use tls.
-  # tls:
-  #   - hosts:
-  #       - ai-api.dev.r7ai.net
+  tls:
+    - hosts:
+        - ada.dev.r7ai.net
   # do not specify this with a managed secret
   # secretName: api-managed-cert
   defaultBackend:

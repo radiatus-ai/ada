@@ -1,8 +1,11 @@
 gen-clients:
-	openapi-generator-cli generate -i data/openai-spec.yaml -g javascript -o ./ui/platform-client
-
-#  && \
-# openapi-generator-cli generate -i data/openai-spec.yaml -g go -o ../go-client
+	cd api && make gen-openapi-spec
+	openapi-generator-cli generate -i api/data/openapi-spec.yaml -g javascript -o ./ui/ada-client
+	./cleanup-gen-ui-client.sh
+	rm -rf ./ui/ada-client/dist
+	cd ui/ada-client && npm run build
+	cd ui && npm install
+	echo "UI client generated and built"
 
 build:
 	docker compose build api-deploy ui-deploy

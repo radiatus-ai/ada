@@ -4,7 +4,7 @@ metadata:
   name: api
   namespace: default
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: api
@@ -86,9 +86,6 @@ spec:
                 secretKeyRef:
                   name: otel-exporter-otlp-headers
                   key: API_OTEL_EXPORTER_OTLP_HEADERS
-      # securityContext:
-      #   runAsNonRoot: true
-      #   runAsUser: 1000
       # volumes:
       # - name: mysecret
       #   csi:

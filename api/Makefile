@@ -22,3 +22,6 @@ upload:
 					--region=us-west2 \
 					--project=ada-test-1234 \
 					&& gcloud run services update-traffic platform-api --to-latest --region us-west2
+
+gen-openapi-spec:
+	poetry run python scripts/gen_openapi_spec.py

@@ -1,6 +1,6 @@
 import { Box, CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import {
   Navigate,
   Route,
@@ -20,6 +20,7 @@ import { darkTheme, lightTheme } from './theme/theme';
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const { darkMode } = useThemeContext();
+  const [isLoading, setIsLoading] = useState(false);
   const theme = useMemo(() => (darkMode ? darkTheme : lightTheme), [darkMode]);
   const { token, login, logout } = useAuth();
 
@@ -27,65 +28,55 @@ function App() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleLoginError = () => {
-    console.error('Login Failed');
-  };
+  // const handleLoginError = () => {
+  //   console.error('Login Failed');
+  // };
 
   const handleLogout = () => {
     logout();
     window.location.href = '/';
   };
 
-  // const onLogin = async (decodedToken, authToken) => {
-  //   const authApi = createApi(AuthApi, authToken);
-  //   const data = { token: authToken };
-  //   try {
-  //     const response = await authApi.loginGoogleAuthLoginPost(data);
-  //     login(response.body.user, response.body.token);
-  //   } catch (error) {
-  //     console.error('Login error:', error);
-  //   }
-  // };
+  const handleLogin = useCallback(
+    async (decodedToken, authToken) => {
+      setIsLoading(true);
+      try {
+        // todo: add env var / config to set this
+        const response = await fetch('https://auth.dev.r7ai.net/login/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: authToken }),
+        });
 
-  const onLogin = async (decodedToken, authToken) => {
-    // const testGoogleLogin = async function(googleToken) {
-    const apiUrl = 'http://localhost:8080'; // Adjust this to your API's URL
-    const endpoint = '/login/google';
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-    try {
-      const response = await fetch(`${apiUrl}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: authToken }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        login(data.user, data.token);
+        console.log('Login successful:', data);
+      } catch (error) {
+        console.error('Login error:', error);
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [login]
+  );
 
-      const data = await response.json();
-
-      login(data.user, data.token);
-      console.log('Login successful:', data);
-
-      // You can handle the successful login here, e.g., storing the token
-      // localStorage.setItem('authToken', data.token);
-
-      return data;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
+  const handleLoginError = (error) => {
+    console.error('Login Failed:', error);
   };
+  // utility for using a token to upload packages, etc. todo: remove and add a hotkey to expose debug info in the UI.
+  // make the debug feature feel really cool.
+  console.log('token', token);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         {!token ? (
-          <LoginScreen onLogin={onLogin} onError={handleLoginError} />
+          <LoginScreen onLogin={handleLogin} onError={handleLoginError} />
         ) : (
           <Box
             sx={{

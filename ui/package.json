@@ -20,6 +20,7 @@
     "@react-three/fiber": "^8.16.8",
     "ada-client": "file:ada-client",
     "axios": "^1.6.8",
+    "buffer": "^6.0.3",
     "dompurify": "^3.1.6",
     "jwt-decode": "^4.0.0",
     "marked": "^13.0.2",

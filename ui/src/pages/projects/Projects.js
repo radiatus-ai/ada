@@ -44,18 +44,6 @@ function Projects() {
   const { token } = useAuth();
   const { projects: projectsApi, error } = useApi();
 
-  useEffect(() => {
-    setTitle('Projects');
-    fetchProjects();
-  }, [setTitle]);
-
-  useEffect(() => {
-    if (error) {
-      console.error('API Error:', error);
-      // You might want to show an error message to the user here
-    }
-  }, [error]);
-
   const fetchProjects = async () => {
     try {
       const response = await projectsApi.list(token);
@@ -66,6 +54,18 @@ function Projects() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setTitle('Projects');
+    fetchProjects();
+  }, [fetchProjects, setTitle]);
+
+  useEffect(() => {
+    if (error) {
+      console.error('API Error:', error);
+      // You might want to show an error message to the user here
+    }
+  }, [error]);
 
   const handleRowClick = (projectId) => {
     navigate(`/prompt?projectId=${projectId}`);

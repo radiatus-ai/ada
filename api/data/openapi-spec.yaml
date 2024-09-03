@@ -1,936 +1,652 @@
----
 openapi: 3.1.0
 info:
   title: Platform API
   version: 0.1.0
 paths:
-  "/auth/login":
+  /messages/{message_id}:
+    put:
+      tags:
+      - messages
+      summary: Update Chat Message
+      operationId: update_chat_message_messages__message_id__put
+      parameters:
+      - name: message_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Message Id
+      - name: chat_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Chat Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - messages
+      summary: Delete Chat Message
+      operationId: delete_chat_message_messages__message_id__delete
+      parameters:
+      - name: message_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Message Id
+      - name: project_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Project Id
+      - name: chat_id
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Chat Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /messages/prompt:
     post:
       tags:
-        - auth
+      - messages
+      summary: Prompt
+      operationId: prompt_messages_prompt_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostQuery'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /messages/stream:
+    post:
+      tags:
+      - messages
+      summary: Prompt
+      operationId: prompt_messages_stream_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostQuery'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /chats/{chat_id}:
+    get:
+      tags:
+      - chats
+      summary: Read Chat
+      operationId: read_chat_chats__chat_id__get
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Chat Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - chats
+      summary: Update Chat
+      operationId: update_chat_chats__chat_id__put
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Chat Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - chats
+      summary: Delete Chat
+      operationId: delete_chat_chats__chat_id__delete
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Chat Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /chats/{chat_id}/messages:
+    post:
+      tags:
+      - chats
+      summary: Create Chat Message
+      operationId: create_chat_message_chats__chat_id__messages_post
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Chat Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - chats
+      summary: Read Chat Messages
+      operationId: read_chat_messages_chats__chat_id__messages_get
+      parameters:
+      - name: chat_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Chat Id
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatMessage'
+                title: Response Read Chat Messages Chats  Chat Id  Messages Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /credentials/:
+    post:
+      tags:
+      - credentials
+      summary: Create Credential
+      description: Create a new credential.
+      operationId: create_credential_credentials__post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredentialCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credential'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - credentials
+      summary: Read Credentials
+      description: Retrieve credentials.
+      operationId: read_credentials_credentials__get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Credential'
+                title: Response Read Credentials Credentials  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /credentials/{credential_id}:
+    get:
+      tags:
+      - credentials
+      summary: Read Credential
+      description: Get a specific credential by ID.
+      operationId: read_credential_credentials__credential_id__get
+      parameters:
+      - name: credential_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Credential Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credential'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - credentials
+      summary: Update Credential
+      description: Update a credential.
+      operationId: update_credential_credentials__credential_id__put
+      parameters:
+      - name: credential_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Credential Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredentialUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credential'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - credentials
+      summary: Delete Credential
+      description: Delete a credential.
+      operationId: delete_credential_credentials__credential_id__delete
+      parameters:
+      - name: credential_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Credential Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credential'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /live/send_message/{message}:
+    get:
+      tags:
+      - live
+      summary: Send Message
+      operationId: send_message_live_send_message__message__get
+      parameters:
+      - name: message
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Message
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /projects:
+    get:
+      tags:
+      - projects
+      summary: List Projects
+      operationId: list_projects_projects_get
+      parameters:
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - projects
+      summary: Create
+      operationId: create_projects_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /projects/{project_id}/chats:
+    post:
+      tags:
+      - projects
+      summary: Create Chat
+      operationId: create_chat_projects__project_id__chats_post
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Project Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - projects
+      summary: Read Chats
+      operationId: read_chats_projects__project_id__chats_get
+      parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid4
+          title: Project Id
+      - name: skip
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          title: Skip
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chat'
+                title: Response Read Chats Projects  Project Id  Chats Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/login:
+    post:
+      tags:
+      - auth
       summary: Login Google
       operationId: login_google_auth_login_post
       requestBody:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/app__api__common__endpoints__auth__PostQuery"
+              type: object
+              title: Body
         required: true
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema: {}
-        "422":
+        '422':
           description: Validation Error
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/auth/create":
-    post:
-      tags:
-        - auth
-      summary: Create User
-      operationId: create_user_auth_create_post
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-  "/me":
+                $ref: '#/components/schemas/HTTPValidationError'
+  /me:
     get:
       tags:
-        - me
+      - me
       summary: Read Users Me
       operationId: read_users_me_me_get
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
       responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/User"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/tokens":
-    post:
-      tags:
-        - tokens
-      summary: Create Api Token
-      operationId: create_api_token_tokens_post
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/APITokenCreate"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/APIToken"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
+                $ref: '#/components/schemas/User'
+  /:
     get:
-      tags:
-        - tokens
-      summary: List Api Tokens
-      operationId: list_api_tokens_tokens_get
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
+      summary: Root
+      operationId: root__get
       responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  "$ref": "#/components/schemas/APIToken"
-                title: Response List Api Tokens Tokens Get
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/tokens/{token_id}":
-    delete:
-      tags:
-        - tokens
-      summary: Delete Api Token
-      operationId: delete_api_token_tokens__token_id__delete
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: token_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            title: Token Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/APIToken"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/ada/v1/credentials/":
-    post:
-      tags:
-        - credentials
-      summary: Create Credential
-      description: Create a new credential.
-      operationId: create_credential_ada_v1_credentials__post
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/CredentialCreate"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/Credential"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-    get:
-      tags:
-        - credentials
-      summary: Read Credentials
-      description: Retrieve credentials.
-      operationId: read_credentials_ada_v1_credentials__get
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: skip
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 0
-            title: Skip
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 100
-            title: Limit
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  "$ref": "#/components/schemas/Credential"
-                title: Response Read Credentials Ada V1 Credentials  Get
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/ada/v1/credentials/{credential_id}":
-    get:
-      tags:
-        - credentials
-      summary: Read Credential
-      description: Get a specific credential by ID.
-      operationId: read_credential_ada_v1_credentials__credential_id__get
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: credential_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            title: Credential Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/Credential"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-    put:
-      tags:
-        - credentials
-      summary: Update Credential
-      description: Update a credential.
-      operationId: update_credential_ada_v1_credentials__credential_id__put
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: credential_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            title: Credential Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/CredentialUpdate"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/Credential"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-    delete:
-      tags:
-        - credentials
-      summary: Delete Credential
-      description: Delete a credential.
-      operationId: delete_credential_ada_v1_credentials__credential_id__delete
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: credential_id
-          in: path
-          required: true
-          schema:
-            type: integer
-            title: Credential Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/Credential"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/ada/v1/projects":
-    get:
-      tags:
-        - projects
-      summary: List Projects
-      operationId: list_projects_ada_v1_projects_get
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: skip
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 0
-            title: Skip
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 100
-            title: Limit
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      responses:
-        "200":
+        '200':
           description: Successful Response
           content:
             application/json:
               schema: {}
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-    post:
-      tags:
-        - projects
-      summary: Create
-      operationId: create_ada_v1_projects_post
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/ProjectCreate"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/ada/v1/projects/{project_id}/chats":
-    post:
-      tags:
-        - projects
-      summary: Create Chat
-      operationId: create_chat_ada_v1_projects__project_id__chats_post
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: project_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Project Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/ChatCreate"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/Chat"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-    get:
-      tags:
-        - projects
-      summary: Read Chats
-      operationId: read_chats_ada_v1_projects__project_id__chats_get
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: project_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Project Id
-        - name: skip
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 0
-            title: Skip
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 100
-            title: Limit
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  "$ref": "#/components/schemas/Chat"
-                title: Response Read Chats Ada V1 Projects  Project Id  Chats Get
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/ada/v1/chats/{chat_id}":
-    get:
-      tags:
-        - chats
-      summary: Read Chat
-      operationId: read_chat_ada_v1_chats__chat_id__get
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: chat_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Chat Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/Chat"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-    put:
-      tags:
-        - chats
-      summary: Update Chat
-      operationId: update_chat_ada_v1_chats__chat_id__put
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: chat_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Chat Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/ChatUpdate"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/Chat"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-    delete:
-      tags:
-        - chats
-      summary: Delete Chat
-      operationId: delete_chat_ada_v1_chats__chat_id__delete
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: chat_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Chat Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/Chat"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/ada/v1/chats/{chat_id}/messages":
-    post:
-      tags:
-        - chats
-      summary: Create Chat Message
-      operationId: create_chat_message_ada_v1_chats__chat_id__messages_post
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: chat_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Chat Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/ChatMessageCreate"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ChatMessage"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-    get:
-      tags:
-        - chats
-      summary: Read Chat Messages
-      operationId: read_chat_messages_ada_v1_chats__chat_id__messages_get
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: chat_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Chat Id
-        - name: skip
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 0
-            title: Skip
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 100
-            title: Limit
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  "$ref": "#/components/schemas/ChatMessage"
-                title:
-                  Response Read Chat Messages Ada V1 Chats  Chat Id  Messages
-                  Get
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/ada/v1/messages/{message_id}":
-    put:
-      tags:
-        - messages
-      summary: Update Chat Message
-      operationId: update_chat_message_ada_v1_messages__message_id__put
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: message_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Message Id
-        - name: chat_id
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Chat Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/ChatMessageUpdate"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ChatMessage"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-    delete:
-      tags:
-        - messages
-      summary: Delete Chat Message
-      operationId: delete_chat_message_ada_v1_messages__message_id__delete
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: message_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Message Id
-        - name: project_id
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Project Id
-        - name: chat_id
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid4
-            title: Chat Id
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/ChatMessage"
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/ada/v1/messages/prompt":
-    post:
-      tags:
-        - messages
-      summary: Prompt
-      operationId: prompt_ada_v1_messages_prompt_post
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/api__ada__v1__endpoints__chat_messages__PostQuery"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
-  "/ada/v1/messages/stream":
-    post:
-      tags:
-        - messages
-      summary: Prompt
-      operationId: prompt_ada_v1_messages_stream_post
-      security:
-        - HTTPBearer: []
-      parameters:
-        - name: x-ada-token
-          in: header
-          required: false
-          schema:
-            type: string
-            title: X-Ada-Token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/api__ada__v1__endpoints__chat_messages__PostQuery"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        "422":
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
 components:
   schemas:
-    APIToken:
-      properties:
-        name:
-          type: string
-          title: Name
-        id:
-          type: string
-          format: uuid4
-          title: Id
-        token:
-          type: string
-          title: Token
-        user_id:
-          type: string
-          format: uuid4
-          title: User Id
-        created_at:
-          type: string
-          format: date-time
-          title: Created At
-        last_used_at:
-          anyOf:
-            - type: string
-              format: date-time
-            - type: "null"
-          title: Last Used At
-      type: object
-      required:
-        - name
-        - id
-        - token
-        - user_id
-        - created_at
-        - last_used_at
-      title: APIToken
-    APITokenCreate:
-      properties:
-        name:
-          type: string
-          title: Name
-      type: object
-      required:
-        - name
-      title: APITokenCreate
     Chat:
       properties:
         name:
@@ -957,10 +673,10 @@ components:
           title: Project Id
       type: object
       required:
-        - name
-        - model
-        - id
-        - project_id
+      - name
+      - model
+      - id
+      - project_id
       title: Chat
     ChatCreate:
       properties:
@@ -980,8 +696,8 @@ components:
           default: false
       type: object
       required:
-        - name
-        - model
+      - name
+      - model
       title: ChatCreate
     ChatMessage:
       properties:
@@ -1018,13 +734,13 @@ components:
           title: Id
       type: object
       required:
-        - role
-        - content
-        - model
-        - tokens
-        - content_raw
-        - chat_id
-        - id
+      - role
+      - content
+      - model
+      - tokens
+      - content_raw
+      - chat_id
+      - id
       title: ChatMessage
     ChatMessageCreate:
       properties:
@@ -1057,49 +773,49 @@ components:
           title: Chat Id
       type: object
       required:
-        - role
-        - content
-        - model
-        - tokens
-        - content_raw
-        - chat_id
+      - role
+      - content
+      - model
+      - tokens
+      - content_raw
+      - chat_id
       title: ChatMessageCreate
     ChatMessageUpdate:
       properties:
         role:
           anyOf:
-            - type: string
-            - type: "null"
+          - type: string
+          - type: 'null'
           title: Role
         content:
           anyOf:
-            - type: string
-            - type: "null"
+          - type: string
+          - type: 'null'
           title: Content
         is_context_file:
           anyOf:
-            - type: boolean
-            - type: "null"
+          - type: boolean
+          - type: 'null'
           title: Is Context File
         model:
           anyOf:
-            - type: string
-            - type: "null"
+          - type: string
+          - type: 'null'
           title: Model
         tokens:
           anyOf:
-            - type: integer
-            - type: "null"
+          - type: integer
+          - type: 'null'
           title: Tokens
         content_raw:
           anyOf:
-            - type: object
-            - type: "null"
+          - type: object
+          - type: 'null'
           title: Content Raw
         is_tool_message:
           anyOf:
-            - type: boolean
-            - type: "null"
+          - type: boolean
+          - type: 'null'
           title: Is Tool Message
       type: object
       title: ChatMessageUpdate
@@ -1107,13 +823,13 @@ components:
       properties:
         name:
           anyOf:
-            - type: string
-            - type: "null"
+          - type: string
+          - type: 'null'
           title: Name
         model:
           anyOf:
-            - type: string
-            - type: "null"
+          - type: string
+          - type: 'null'
           title: Model
       type: object
       title: ChatUpdate
@@ -1123,11 +839,11 @@ components:
           type: string
           title: Name
         credential_type:
-          "$ref": "#/components/schemas/CredentialType"
+          $ref: '#/components/schemas/CredentialType'
         metadata:
           anyOf:
-            - type: object
-            - type: "null"
+          - type: object
+          - type: 'null'
           title: Metadata
         id:
           type: string
@@ -1139,10 +855,10 @@ components:
           title: Organization Id
       type: object
       required:
-        - name
-        - credential_type
-        - id
-        - organization_id
+      - name
+      - credential_type
+      - id
+      - organization_id
       title: Credential
     CredentialCreate:
       properties:
@@ -1150,49 +866,49 @@ components:
           type: string
           title: Name
         credential_type:
-          "$ref": "#/components/schemas/CredentialType"
+          $ref: '#/components/schemas/CredentialType'
         metadata:
           anyOf:
-            - type: object
-            - type: "null"
+          - type: object
+          - type: 'null'
           title: Metadata
         data:
           type: object
           title: Data
       type: object
       required:
-        - name
-        - credential_type
-        - data
+      - name
+      - credential_type
+      - data
       title: CredentialCreate
     CredentialType:
       type: string
       enum:
-        - api_key
-        - github_pat
-        - gcp_service_account
-        - other
+      - api_key
+      - github_pat
+      - gcp_service_account
+      - other
       title: CredentialType
     CredentialUpdate:
       properties:
         name:
           anyOf:
-            - type: string
-            - type: "null"
+          - type: string
+          - type: 'null'
           title: Name
         credential_type:
           anyOf:
-            - "$ref": "#/components/schemas/CredentialType"
-            - type: "null"
+          - $ref: '#/components/schemas/CredentialType'
+          - type: 'null'
         metadata:
           anyOf:
-            - type: object
-            - type: "null"
+          - type: object
+          - type: 'null'
           title: Metadata
         data:
           anyOf:
-            - type: object
-            - type: "null"
+          - type: object
+          - type: 'null'
           title: Data
       type: object
       title: CredentialUpdate
@@ -1200,11 +916,25 @@ components:
       properties:
         detail:
           items:
-            "$ref": "#/components/schemas/ValidationError"
+            $ref: '#/components/schemas/ValidationError'
           type: array
           title: Detail
       type: object
       title: HTTPValidationError
+    PostQuery:
+      properties:
+        prompt:
+          type: string
+          title: Prompt
+        chatId:
+          type: string
+          format: uuid4
+          title: Chatid
+      type: object
+      required:
+      - prompt
+      - chatId
+      title: PostQuery
     ProjectCreate:
       properties:
         name:
@@ -1216,13 +946,13 @@ components:
           default: false
         organization_id:
           anyOf:
-            - type: string
-              format: uuid4
-            - type: "null"
+          - type: string
+            format: uuid4
+          - type: 'null'
           title: Organization Id
       type: object
       required:
-        - name
+      - name
       title: ProjectCreate
     User:
       properties:
@@ -1239,23 +969,23 @@ components:
           title: Id
         organization_id:
           anyOf:
-            - type: string
-              format: uuid4
-            - type: "null"
+          - type: string
+            format: uuid4
+          - type: 'null'
           title: Organization Id
       type: object
       required:
-        - email
-        - google_id
-        - id
+      - email
+      - google_id
+      - id
       title: User
     ValidationError:
       properties:
         loc:
           items:
             anyOf:
-              - type: string
-              - type: integer
+            - type: string
+            - type: integer
           type: array
           title: Location
         msg:
@@ -1266,39 +996,7 @@ components:
           title: Error Type
       type: object
       required:
-        - loc
-        - msg
-        - type
+      - loc
+      - msg
+      - type
       title: ValidationError
-    api__ada__v1__endpoints__chat_messages__PostQuery:
-      properties:
-        prompt:
-          type: string
-          title: Prompt
-        chatId:
-          type: string
-          format: uuid4
-          title: Chatid
-      type: object
-      required:
-        - prompt
-        - chatId
-      title: PostQuery
-    app__api__common__endpoints__auth__PostQuery:
-      properties:
-        token:
-          type: string
-          title: Token
-        organization_id:
-          anyOf:
-            - type: integer
-            - type: "null"
-          title: Organization Id
-      type: object
-      required:
-        - token
-      title: PostQuery
-  securitySchemes:
-    HTTPBearer:
-      type: http
-      scheme: bearer

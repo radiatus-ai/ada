@@ -1,18 +1,28 @@
-from fastapi import APIRouter
+from api.ada.v1.endpoints import (
+    chat_messages,
+    chats,
+    credentials,
+    live,
+    projects,
+)
+from api.common.endpoints import (
+    auth,
+    me,
+)
+from fastapi import APIRouter, Depends
 
-from app.api.ada.v1.api import api_router as ada_v1
-from app.api.common.api import api_router as me_router
+# tokens,
+from app.core.dependencies import get_db_and_current_user
 
-# Import other domain-specific API modules here
-
-api_router = APIRouter()
-
-# Include the /me endpoint
-api_router.include_router(me_router)
-
-# Include domain-specific routers
-api_router.include_router(ada_v1, prefix="/ada/v1")
-# Include other domain-specific routers here
+api_router = APIRouter(dependencies=[Depends(get_db_and_current_user)])
+api_router.include_router(chat_messages.router)
+api_router.include_router(chats.router)
+api_router.include_router(credentials.router)
+api_router.include_router(live.router)
+api_router.include_router(projects.router)
+api_router.include_router(auth.router)
+api_router.include_router(me.router)
+# api_router.include_router(tokens.router)
 
 base_router = APIRouter()
 
