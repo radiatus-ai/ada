@@ -44,59 +44,29 @@ const useApi = () => {
     []
   );
 
+  // TODO:
+  // const auth = {
+  //   loginGoogle: (data, token, parentSpan) =>
+  //     apiCall(AuthApi, 'loginGoogleAuthLoginPost', [data], token, parentSpan),
+  // };
+
   const projects = {
     list: (token, parentSpan) =>
-      apiCall(
-        ProjectsApi,
-        'listProjectsAdaV1ProjectsGet',
-        [],
-        token,
-        parentSpan
-      ),
+      apiCall(ProjectsApi, 'listProjectsProjectsGet', [], token, parentSpan),
     create: (data, token, parentSpan) =>
-      apiCall(
-        ProjectsApi,
-        'createAdaV1ProjectsPost',
-        [data],
-        token,
-        parentSpan
-      ),
+      apiCall(ProjectsApi, 'createProjectsPost', [data], token, parentSpan),
     createChat: (id, data, token, parentSpan) =>
       apiCall(
         ProjectsApi,
-        'createChatAdaV1ProjectsProjectIdChatsPost',
+        'createChatProjectsProjectIdChatsPost',
         [id, data],
-        token,
-        parentSpan
-      ),
-    get: (id, token, parentSpan) =>
-      apiCall(
-        ProjectsApi,
-        'getProjectAdaV1ProjectsProjectIdGet',
-        [id],
-        token,
-        parentSpan
-      ),
-    update: (id, data, token, parentSpan) =>
-      apiCall(
-        ProjectsApi,
-        'updateProjectAdaV1ProjectsProjectIdPut',
-        [id, data],
-        token,
-        parentSpan
-      ),
-    delete: (id, token, parentSpan) =>
-      apiCall(
-        ProjectsApi,
-        'deleteProjectAdaV1ProjectsProjectIdDelete',
-        [id],
         token,
         parentSpan
       ),
     listRecentChats: (id, token, parentSpan) =>
       apiCall(
         ProjectsApi,
-        'readChatsAdaV1ProjectsProjectIdChatsGet',
+        'readChatsProjectsProjectIdChatsGet',
         [id],
         token,
         parentSpan
@@ -107,34 +77,38 @@ const useApi = () => {
     create: (chatId, data, token, parentSpan) =>
       apiCall(
         ChatsApi,
-        'createChatMessageAdaV1ChatsChatIdMessagesPost',
-        [chatId, 1, data],
+        'createChatMessageChatsChatIdMessagesPost',
+        [chatId, data],
         token,
         parentSpan
       ),
-    // prompt: (chatId, data, token, parentSpan) => apiCall(ChatsApi, 'createChatMessageAdaV1ChatsChatIdMessagesPost', [chatId, 1, data], token, parentSpan),
     listMessages: (id, token, parentSpan) =>
       apiCall(
         ChatsApi,
-        'readChatMessagesAdaV1ChatsChatIdMessagesGet',
-
+        'readChatMessagesChatsChatIdMessagesGet',
         [id],
         token,
         parentSpan
       ),
-    // create: (data, token, parentSpan) => apiCall(ProjectsApi, 'createAdaV1ProjectsPost', [data], token, parentSpan),
     get: (id, token, parentSpan) =>
-      apiCall(ChatsApi, 'readChatAdaV1ChatsChatIdGet', [id], token, parentSpan),
-    // update: (id, data, token, parentSpan) => apiCall(ProjectsApi, 'updateProjectAdaV1ProjectsProjectIdPut', [id, data], token, parentSpan),
-    // delete: (id, token, parentSpan) => apiCall(ProjectsApi, 'deleteProjectAdaV1ProjectsProjectIdDelete', [id], token, parentSpan),
-    // listRecentChats: (id, token, parentSpan) => apiCall(ProjectsApi, 'readChatsAdaV1ProjectsProjectIdChatsGet', [id], token, parentSpan),
+      apiCall(ChatsApi, 'readChatChatsChatIdGet', [id], token, parentSpan),
+    update: (id, data, token, parentSpan) =>
+      apiCall(
+        ChatsApi,
+        'updateChatChatsChatIdPut',
+        [id, data],
+        token,
+        parentSpan
+      ),
+    delete: (id, token, parentSpan) =>
+      apiCall(ChatsApi, 'deleteChatChatsChatIdDelete', [id], token, parentSpan),
   };
 
   const chatMessages = {
     create: (data, token, parentSpan) =>
       apiCall(
         MessagesApi,
-        'promptAdaV1MessagesPromptPost',
+        'promptMessagesPromptPost',
         [data],
         token,
         parentSpan
@@ -142,28 +116,67 @@ const useApi = () => {
     createStream: (data, token, parentSpan) =>
       apiCall(
         MessagesApi,
-        'promptAdaV1MessagesStreamPost',
+        'promptMessagesStreamPost',
         [data],
         token,
         parentSpan
       ),
-    // listMessages: (id, token, parentSpan) => apiCall(ChatsApi, 'readChatMessagesAdaV1ChatsChatIdMessagesGet', [id, 1], token, parentSpan),
+    update: (id, data, token, parentSpan) =>
+      apiCall(
+        MessagesApi,
+        'updateChatMessageMessagesMessageIdPut',
+        [id, data],
+        token,
+        parentSpan
+      ),
+    delete: (id, token, parentSpan) =>
+      apiCall(
+        MessagesApi,
+        'deleteChatMessageMessagesMessageIdDelete',
+        [id],
+        token,
+        parentSpan
+      ),
   };
 
   const credentials = {
-    getSettings: (token, parentSpan) =>
+    list: (token, parentSpan) =>
       apiCall(
         CredentialsApi,
-        'getSettingsAdaV1CredentialsGet',
+        'readCredentialsCredentialsGet',
         [],
         token,
         parentSpan
       ),
-    updateSettings: (data, token, parentSpan) =>
+    create: (data, token, parentSpan) =>
       apiCall(
         CredentialsApi,
-        'updateSettingsAdaV1CredentialsPut',
+        'createCredentialCredentialsPost',
         [data],
+        token,
+        parentSpan
+      ),
+    get: (id, token, parentSpan) =>
+      apiCall(
+        CredentialsApi,
+        'readCredentialCredentialsCredentialIdGet',
+        [id],
+        token,
+        parentSpan
+      ),
+    update: (id, data, token, parentSpan) =>
+      apiCall(
+        CredentialsApi,
+        'updateCredentialCredentialsCredentialIdPut',
+        [id, data],
+        token,
+        parentSpan
+      ),
+    delete: (id, token, parentSpan) =>
+      apiCall(
+        CredentialsApi,
+        'deleteCredentialCredentialsCredentialIdDelete',
+        [id],
         token,
         parentSpan
       ),

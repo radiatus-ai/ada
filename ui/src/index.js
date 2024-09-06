@@ -12,21 +12,14 @@ import { TitleProvider } from './contexts/TitleContext';
 import reportWebVitals from './reportWebVitals';
 import './theme/index.css';
 
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker
-//       .register('/service-worker.js')
-//       .then((registration) => {
-//         console.log(
-//           'Service Worker registered successfully:',
-//           registration.scope
-//         );
-//       })
-//       .catch((error) => {
-//         console.log('Service Worker registration failed:', error);
-//       });
-//   });
-// }
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker
+    .register('/service-worker.js')
+    .then((registration) => console.log('Service Worker registered'))
+    .catch((error) =>
+      console.log('Service Worker registration failed:', error)
+    );
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

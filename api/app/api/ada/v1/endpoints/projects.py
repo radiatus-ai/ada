@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from opentelemetry import trace
@@ -30,39 +30,22 @@ async def list_projects(
 ):
     db = deps["db"]
     current_user = deps["current_user"]
+    organization_id = deps["organization_id"]
     trace_context = request.state.trace_context
 
     tracer = trace.get_tracer(__name__)
 
-    if trace_context:
-        logger.info(
-            f"Trace context found: TraceId={trace_context.trace_id:032x}, SpanId={trace_context.span_id:016x}"
+    with tracer.start_as_current_span("list_projects", context=trace_context) as span:
+        span.set_attribute("user.id", str(current_user["id"]))
+        span.set_attribute("organization.id", str(organization_id))
+        span.set_attribute("skip", skip)
+        span.set_attribute("limit", limit)
+
+        projects = await crud_project.list_projects_for_organization(
+            db, organization_id=organization_id, skip=skip, limit=limit
         )
-        with tracer.start_as_current_span(
-            "list_projects",
-            context=trace.set_span_in_context(trace.NonRecordingSpan(trace_context)),
-        ) as span:
-            span.set_attribute("user.id", str(current_user.id))
-            span.set_attribute("skip", skip)
-            span.set_attribute("limit", limit)
 
-            projects = await crud_project.list_projects_for_user(
-                db, user=current_user, skip=skip, limit=limit
-            )
-
-            span.set_attribute("projects.count", len(projects))
-    else:
-        logger.info("No trace context found, starting new trace")
-        with tracer.start_as_current_span("list_projects") as span:
-            span.set_attribute("user.id", str(current_user.id))
-            span.set_attribute("skip", skip)
-            span.set_attribute("limit", limit)
-
-            projects = await crud_project.list_projects_for_user(
-                db, user=current_user, skip=skip, limit=limit
-            )
-
-            span.set_attribute("projects.count", len(projects))
+        span.set_attribute("projects.count", len(projects))
 
     return projects
 
@@ -107,18 +90,25 @@ async def create_chat(
 
 @router.get("/{project_id}/chats", response_model=List[Chat])
 async def read_chats(
-    project_id: UUID4,
+    project_id: Optional[UUID4] = None,
     skip: int = 0,
     limit: int = 100,
     deps: dict = Depends(get_db_and_current_user),
 ):
     db = deps["db"]
     current_user = deps["current_user"]
+    default_project = deps["default_project"]
+
+    if not project_id:
+        project_id = default_project.id
+
     project = await crud_project.get(db, id=project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    # if project.organization_id != current_user.organization_id:
-    #     raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    if project.organization_id != UUID4(current_user["organization_id"]):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
     chats = await crud_chat.get_chats_for_project(
         db, project_id=project_id, skip=skip, limit=limit
     )

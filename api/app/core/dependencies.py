@@ -38,8 +38,10 @@ async def get_current_user(request: Request):
     if response.status_code != 200:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
-    user = response.json()["user"]
-    user["organization_id"] = "21f2a147-212d-415a-b34f-e3ab4bce1d76"
+    data = response.json()
+    user = data["user"]
+    user["organization_id"] = data.get("organization_id")
+    user["default_project_id"] = data.get("default_project_id")
 
     return user
 
@@ -50,25 +52,29 @@ async def get_db_and_current_user(
     current_user: dict = Depends(get_current_user),
     trace_context: Optional[trace.SpanContext] = Depends(get_trace_context),
 ):
-    # default_project = await initialize_user_session(db, current_user)
-    # Ensure organization reference exists
     org_ref = await crud_org_ref.get_or_create(
         db,
         id=UUID(current_user["organization_id"]),
-        name="Default Organization",  # You might want to get this from the user data
+        name="Default Organization",
     )
 
-    # Get or create default project
-    default_project = await crud_project.get_or_create_default(
-        db, organization_id=org_ref.id
-    )
+    default_project = None
+    if current_user.get("default_project_id"):
+        default_project = await crud_project.get(
+            db, id=UUID(current_user["default_project_id"])
+        )
+
+    if not default_project:
+        default_project = await crud_project.get_or_create_default(
+            db, organization_id=org_ref.id
+        )
 
     return {
         "db": db,
         "current_user": current_user,
         "trace_context": trace_context,
         "default_project": default_project,
-        "organization_id": org_ref,
+        "organization_id": org_ref.id,
     }
 
 
