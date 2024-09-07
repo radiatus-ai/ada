@@ -4,6 +4,21 @@ const CACHE_NAME = 'city-wireframe-cache-v3';
 const MODEL_URLS = [
   'https://storage.googleapis.com/ui-models/sanfrancisco.gltf',
   'https://storage.googleapis.com/ui-models/sanfrancisco.bin',
+
+  'https://storage.googleapis.com/ui-models/chicago.gltf',
+  'https://storage.googleapis.com/ui-models/chicago.bin',
+
+  'https://storage.googleapis.com/ui-models/losangeles.gltf',
+  'https://storage.googleapis.com/ui-models/losangeles.bin',
+
+  'https://storage.googleapis.com/ui-models/newyork.gltf',
+  'https://storage.googleapis.com/ui-models/newyork.bin',
+
+  'https://storage.googleapis.com/ui-models/sanfrancisco.gltf',
+  'https://storage.googleapis.com/ui-models/sanfrancisco.bin',
+
+  'https://storage.googleapis.com/ui-models/seattle.gltf',
+  'https://storage.googleapis.com/ui-models/seattle.bin',
 ];
 
 self.addEventListener('install', (event) => {
